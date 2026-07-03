@@ -9,7 +9,8 @@
 #include <pthread.h>
 
 #define SERIAL_PORT_PATH "/dev/ttyUL0"
-#define BUFFER_SIZE      128
+#define COMMAND_SIZE     16
+#define BUFFER_SIZE      1024
 
 struct termios g_tty;
 int            g_fd;
@@ -78,12 +79,12 @@ static void close_serial_port( void )
 
 static void sem_switch_to_idle( void )
 {
-    char    command;
-    char    buffer[ BUFFER_SIZE ];
+    char    command [ COMMAND_SIZE ];
+    char    buffer  [ BUFFER_SIZE  ];
 
     //--------------------------------------------------------------
 
-    memset( buffer  , 0 , BUFFER_SIZE );
+    memset( buffer , 0 , BUFFER_SIZE );
     
     read( g_fd , ( uint8_t* )buffer , BUFFER_SIZE  );
 
@@ -99,17 +100,19 @@ static void sem_switch_to_idle( void )
 
     //--------------------------------------------------------------
 
-    command = 'I';
+    memset( command , 0 , COMMAND_SIZE );
 
-    write( g_fd , ( uint8_t* )( &command ) , 1 );
+    strcpy( command , "I" );
 
-    printf( "\r\nCommand '%c' sent\r\n" , command );
+    write( g_fd , ( uint8_t* )command , COMMAND_SIZE );
+
+    printf( "\r\nCommand '%s' sent\r\n" , command );
 
     //--------------------------------------------------------------
 
     sleep( 1 );
 
-    memset( buffer  , 0 , BUFFER_SIZE );
+    memset( buffer , 0 , BUFFER_SIZE );
 
     read( g_fd , ( uint8_t* )buffer  , BUFFER_SIZE );
 
@@ -125,17 +128,19 @@ static void sem_switch_to_idle( void )
 
     //--------------------------------------------------------------
 
-    command = 'O';
+    memset( command , 0 , COMMAND_SIZE );
 
-    write( g_fd , ( uint8_t* )( &command ) , 1 );
+    strcpy( command , "Q C000C350000" ); // LFA: 50000
 
-    printf( "\r\nCommand '%c' sent\r\n" , command );
+    write( g_fd , ( uint8_t* )command , COMMAND_SIZE );
+
+    printf( "\r\nCommand '%s' sent\r\n" , command );
 
     //--------------------------------------------------------------
 
     sleep( 1 );
 
-    memset( buffer  , 0 , BUFFER_SIZE );
+    memset( buffer , 0 , BUFFER_SIZE );
     
     read( g_fd , ( uint8_t* )buffer  , BUFFER_SIZE );
 
