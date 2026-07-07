@@ -33,12 +33,11 @@ void configure_serial_port(int fd)
     cfsetospeed(&tty_attributes, B115200);
 
     // *Fix* Need to check alternative flags in manual
-    // tty_attributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-    // tty_attributes.c_oflag &= ~OPOST;
-    // tty_attributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-    // tty_attributes.c_cflag &= ~(CSIZE | PARENB | CSTOPB);
-    // tty_attributes.c_cflag |= CS8;
-    cfmakeraw( &tty_attributes );
+    tty_attributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+    tty_attributes.c_oflag &= ~OPOST;
+    tty_attributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    tty_attributes.c_cflag &= ~(CSIZE | PARENB | CSTOPB);
+    tty_attributes.c_cflag |= CS8;
 
     if (tcsetattr(fd, TCSANOW, &tty_attributes)) {
         printf("Something went wrong while setting port attributes!\r\n");

@@ -13,68 +13,7 @@
 #define COMMAND_SIZE 16
 #define BUFFER_SIZE 1024
 
-// struct termios g_tty;
 int file_descriptor;
-
-// FILE OPERATION
-// static int file_open_and_get_descriptor( const char *fname )
-// {
-//     int fd;
-
-//     fd = open( fname , O_RDWR | O_NONBLOCK );
-
-//     if ( fd < 0 )
-//     {
-//         printf( "Could not open file %s...%d\r\n" , fname , fd );
-//     }
-
-//     return fd;
-// }
-
-// static int file_close( int fd )
-// {
-//     return close( fd );
-// }
-
-// static void open_serial_port( void )
-// {
-//     file_descriptor = file_open_and_get_descriptor( SERIAL_PORT_PATH );
-
-//     if ( file_descriptor < 0 )
-//     {
-//         printf( "Something went wrong while opening the port...\r\n" );
-//         exit( EXIT_FAILURE );
-//     }
-// }
-
-// static void configure_serial_port( void )
-// {
-//     if ( tcgetattr( file_descriptor , &g_tty ) )
-//     {
-//         printf( "Something went wrong while getting port attributes...\r\n" );
-//         exit( EXIT_FAILURE );
-//     }
-
-//     cfsetispeed( &g_tty , B115200 );
-//     cfsetospeed( &g_tty , B115200 );
-
-//     g_tty.c_iflag &= ~( IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON );
-//     g_tty.c_oflag &= ~OPOST;
-//     g_tty.c_lflag &= ~( ECHO   | ECHONL | ICANON | ISIG   | IEXTEN );
-//     g_tty.c_cflag &= ~( CSIZE  | PARENB | CSTOPB );
-//     g_tty.c_cflag |=  CS8;
-
-//     if ( tcsetattr( file_descriptor , TCSANOW , &g_tty ) )
-//     {
-//         printf( "Something went wrong while setting port attributes...\r\n" );
-//         exit( EXIT_FAILURE );
-//     }
-// }
-
-// static void close_serial_port( void )
-// {
-//     file_close( file_descriptor );
-// }
 
 static void sem_switch_to_idle(void)
 {
@@ -157,7 +96,7 @@ int main(void)
 {
     printf("Starting the sem_init application...\r\n");
 
-    open_serial_port(SERIAL_PORT_PATH);
+    file_descriptor = open_serial_port(SERIAL_PORT_PATH);
 
     configure_serial_port(file_descriptor);
 
