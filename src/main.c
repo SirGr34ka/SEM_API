@@ -1,4 +1,4 @@
-#include "./../include/uart_config.h"
+#include "uart_config.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,11 +8,10 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <termios.h>
-#include <pthread.h>
 
 #define SERIAL_PORT_PATH "/dev/ttyUL0"
-#define COMMAND_SIZE     16
-#define BUFFER_SIZE      1024
+#define COMMAND_SIZE 16
+#define BUFFER_SIZE 1024
 
 // struct termios g_tty;
 int file_descriptor;
@@ -36,7 +35,6 @@ int file_descriptor;
 // {
 //     return close( fd );
 // }
-
 
 // static void open_serial_port( void )
 // {
@@ -78,98 +76,94 @@ int file_descriptor;
 //     file_close( file_descriptor );
 // }
 
-
-static void sem_switch_to_idle( void )
+static void sem_switch_to_idle(void)
 {
-    char    command [ COMMAND_SIZE ];
-    char    buffer  [ BUFFER_SIZE  ];
+    char command[COMMAND_SIZE];
+    char buffer[BUFFER_SIZE];
 
     //--------------------------------------------------------------
+    memset(buffer, 0, BUFFER_SIZE);
 
-    memset( buffer , 0 , BUFFER_SIZE );
-    
-    read( file_descriptor , ( uint8_t* )buffer , BUFFER_SIZE  );
+    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
 
-    for ( size_t i = 0 ; i < BUFFER_SIZE ; ++i )
-    {
-        printf( "%c" , buffer[ i ] );
+    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
+        printf("%c", buffer[i]);
 
-        if ( buffer[ i ] == '\r' )
-            printf( "\n" );
+        if (buffer[i] == '\r') {
+            printf("\n");
+        }
     }
 
-    printf( "\r\n" );
+    printf("\r\n");
 
     //--------------------------------------------------------------
 
-    memset( command , 0 , COMMAND_SIZE );
+    memset(command, 0, COMMAND_SIZE);
 
-    strcpy( command , "I" );
+    strcpy(command, "I");
 
-    write( file_descriptor , ( uint8_t* )command , COMMAND_SIZE );
+    write(file_descriptor, (uint8_t *)command, COMMAND_SIZE);
 
-    printf( "\r\nCommand '%s' sent\r\n" , command );
+    printf("\r\nCommand '%s' sent\r\n", command);
 
     //--------------------------------------------------------------
 
-    sleep( 1 );
+    sleep(1);
 
-    memset( buffer , 0 , BUFFER_SIZE );
+    memset(buffer, 0, BUFFER_SIZE);
 
-    read( file_descriptor , ( uint8_t* )buffer  , BUFFER_SIZE );
+    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
 
-    for ( size_t i = 0 ; i < BUFFER_SIZE ; ++i )
-    {
-        printf( "%c" , buffer[ i ] );
+    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
+        printf("%c", buffer[i]);
 
-        if ( buffer[ i ] == '\r' )
-            printf( "\n" );
+        if (buffer[i] == '\r') {
+            printf("\n");
+        }
     }
 
-    printf( "\r\n" );
+    printf("\r\n");
 
     //--------------------------------------------------------------
 
-    memset( command , 0 , COMMAND_SIZE );
+    memset(command, 0, COMMAND_SIZE);
 
-    strcpy( command , "Q C000C350000" ); // LFA: 50000
+    strcpy(command, "Q C000C350000"); // LFA: 50000
 
-    write( file_descriptor , ( uint8_t* )command , COMMAND_SIZE );
+    write(file_descriptor, (uint8_t *)command, COMMAND_SIZE);
 
-    printf( "\r\nCommand '%s' sent\r\n" , command );
+    printf("\r\nCommand '%s' sent\r\n", command);
 
     //--------------------------------------------------------------
 
-    sleep( 1 );
+    sleep(1);
 
-    memset( buffer , 0 , BUFFER_SIZE );
-    
-    read( file_descriptor , ( uint8_t* )buffer  , BUFFER_SIZE );
+    memset(buffer, 0, BUFFER_SIZE);
 
-    for ( size_t i = 0 ; i < BUFFER_SIZE ; ++i )
-    {
-        printf( "%c" , buffer[ i ] );
+    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
 
-        if ( buffer[ i ] == '\r' )
-            printf( "\n" );
+    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
+        printf("%c", buffer[i]);
+
+        if (buffer[i] == '\r') {
+            printf("\n");
+        }
     }
 
-    printf( "\r\n" );
+    printf("\r\n");
 }
 
-
-int main( void )
+int main(void)
 {
-    printf( "Starting the sem_init application...\r\n" );
+    printf("Starting the sem_init application...\r\n");
 
-    open_serial_port( SERIAL_PORT_PATH );
+    open_serial_port(SERIAL_PORT_PATH);
 
-    configure_serial_port( file_descriptor );
+    configure_serial_port(file_descriptor);
 
     sem_switch_to_idle();
 
-    close_serial_port( file_descriptor );
+    close_serial_port(file_descriptor);
 
     return 0;
 }
-

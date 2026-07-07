@@ -1,25 +1,41 @@
-# Define variables for project name and required libraries
+# Define variables for project name and directories
 PROJECT_NAME := sem_api
 SOURCE_DIR   := src
 INCLUDE_DIR  := include
-BUILD_DIR    := build
+BUILD_DIR    ?= build
 
-# Define compiler flags
-CC           := ./../arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
-CFLAGS       := -Wall -Wextra -pedantic -std=c11
+# Define variables for source and object files
+SOURCE_FILES := $(wildcard $(SOURCE_DIR)/*.c)
+OBJECT_FILES := $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/%.o, $(SOURCE_FILES))
 
-all: $(PROJECT_NAME)
+# Define variables for compiler and flags
+ifeq ($(origin CC), default)
+	CC = ./../arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
+endif
+
+CFLAGS ?= -Wall -Wextra -pedantic -std=c11 -I./$(INCLUDE_DIR)
+
+.PHONY : all
+all : $(PROJECT_NAME)
+
+# Include all dependencies
+NODEPS = clean
+
+ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
+include $(OBJECT_FILES:.o=.d)
+endif
 
 # Compile the project
-$(PROJECT_NAME): $(notdir $(patsubst %.c, %.o, $(wildcard $(SOURCE_DIR)/*.c)))
+$(PROJECT_NAME) : $(OBJECT_FILES)
 	$(CC) $(CFLAGS) $^ -o $@
 
-VPATH := $(BUILD_DIR)
+$(BUILD_DIR)/%.o : $(SOURCE_DIR)/%.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
-%.o: $(SOURCE_DIR)/%.c
-	$(CC) $(CFLAGS) -c -MD $^ -o $(BUILD_DIR)/$@
-	include $(patsubst $(SOURCE_DIR)/%.c, $(BUILD_DIR)/%.d, $^)
+$(BUILD_DIR)/%.d : $(SOURCE_DIR)/%.c
+	$(CC) $(CFLAGS) -E -MM -MT $(@:.d=.o) $< > $@
 
 # Clean up object files and executable
-clean:
+.PHONY : clean
+clean :
 	rm -f $(addprefix $(BUILD_DIR)/, *.o *.d) $(PROJECT_NAME)

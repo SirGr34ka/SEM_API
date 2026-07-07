@@ -15,5 +15,5 @@
 Используется компилятор gcc из тулчейна для ARM процессоров, который позволяет выполнить кросс-компиляцию под Linux (arm-gnu-toolchain).
 
    ```bash
-   ./path/to/toolchain/gcc -Wall -Wextra -pedantic -std=c11 ./main.c -o ./build/sem_api
+   make
    ```
