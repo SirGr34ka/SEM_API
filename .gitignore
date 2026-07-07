@@ -1,4 +1,5 @@
 /build/
-/sem_api
+
 /.*
 /*.sh
+/sem_api

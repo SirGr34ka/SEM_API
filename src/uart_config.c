@@ -4,12 +4,13 @@
 #include <stdlib.h>
 #include <termios.h>
 #include <stdio.h>
+#include <unistd.h>
 
 int open_serial_port(char *port_path)
 {
     int fd;
 
-    fd = open(port_path, O_RDWR | O_NONBLOCK); // *Fix* Need to check alternative flags in manual
+    fd = open(port_path, O_RDWR | O_NONBLOCK);
 
     if (fd < 0) {
         printf("Could not open the file '%s'! File descriptor was: %d.\r\n", port_path, fd);
@@ -32,11 +33,12 @@ void configure_serial_port(int fd)
     cfsetospeed(&tty_attributes, B115200);
 
     // *Fix* Need to check alternative flags in manual
-    tty_attributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
-    tty_attributes.c_oflag &= ~OPOST;
-    tty_attributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
-    tty_attributes.c_cflag &= ~(CSIZE | PARENB | CSTOPB);
-    tty_attributes.c_cflag |= CS8;
+    // tty_attributes.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+    // tty_attributes.c_oflag &= ~OPOST;
+    // tty_attributes.c_lflag &= ~(ECHO | ECHONL | ICANON | ISIG | IEXTEN);
+    // tty_attributes.c_cflag &= ~(CSIZE | PARENB | CSTOPB);
+    // tty_attributes.c_cflag |= CS8;
+    cfmakeraw( &tty_attributes );
 
     if (tcsetattr(fd, TCSANOW, &tty_attributes)) {
         printf("Something went wrong while setting port attributes!\r\n");
@@ -46,13 +48,8 @@ void configure_serial_port(int fd)
 
 void close_serial_port(int fd)
 {
-    // int close_code;
-
-    close(fd);
-
-    // if ( close_code < 0 )
-    // {
-    //     printf( "Could not close the file! File descriptor was: %d\r\n" , fd );
-    //     exit( EXIT_FAILURE );
-    // }
+    if (close(fd) < 0) {
+        printf("Could not close the file! File descriptor was: %d\r\n", fd);
+        exit(EXIT_FAILURE);
+    }
 }
