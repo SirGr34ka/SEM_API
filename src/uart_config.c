@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <unistd.h>
 
-int open_serial_port(char *port_path)
+int open_serial_port(const char *port_path)
 {
     int fd;
 
@@ -20,7 +20,7 @@ int open_serial_port(char *port_path)
     return fd;
 }
 
-void configure_serial_port(int fd)
+void configure_serial_port(const int fd)
 {
     struct termios tty_attributes;
 
@@ -45,7 +45,7 @@ void configure_serial_port(int fd)
     }
 }
 
-void close_serial_port(int fd)
+void close_serial_port(const int fd)
 {
     if (close(fd) < 0) {
         printf("Could not close the file! File descriptor was: %d\r\n", fd);

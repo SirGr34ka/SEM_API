@@ -1,95 +1,26 @@
 #include "uart_config.h"
+#include "uart_io.h"
 
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <stdint.h>
-#include <errno.h>
-#include <fcntl.h>
 #include <unistd.h>
-#include <termios.h>
 
 #define SERIAL_PORT_PATH "/dev/ttyUL0"
-#define COMMAND_SIZE 16
-#define BUFFER_SIZE 1024
 
 int file_descriptor;
 
 static void sem_switch_to_idle(void)
 {
-    char command[COMMAND_SIZE];
-    char buffer[BUFFER_SIZE];
+    recieve_data(file_descriptor);
 
-    //--------------------------------------------------------------
-    memset(buffer, 0, BUFFER_SIZE);
-
-    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
-
-    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
-        printf("%c", buffer[i]);
-
-        if (buffer[i] == '\r') {
-            printf("\n");
-        }
-    }
-
-    printf("\r\n");
-
-    //--------------------------------------------------------------
-
-    memset(command, 0, COMMAND_SIZE);
-
-    strcpy(command, "I");
-
-    write(file_descriptor, (uint8_t *)command, COMMAND_SIZE);
-
-    printf("\r\nCommand '%s' sent\r\n", command);
-
-    //--------------------------------------------------------------
+    send_command(file_descriptor, MOVE_TO_IDLE);
 
     sleep(1);
+    recieve_data(file_descriptor);
 
-    memset(buffer, 0, BUFFER_SIZE);
-
-    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
-
-    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
-        printf("%c", buffer[i]);
-
-        if (buffer[i] == '\r') {
-            printf("\n");
-        }
-    }
-
-    printf("\r\n");
-
-    //--------------------------------------------------------------
-
-    memset(command, 0, COMMAND_SIZE);
-
-    strcpy(command, "Q C000C350000"); // LFA: 50000
-
-    write(file_descriptor, (uint8_t *)command, COMMAND_SIZE);
-
-    printf("\r\nCommand '%s' sent\r\n", command);
-
-    //--------------------------------------------------------------
+    send_command(file_descriptor, DO_QUARY_CONST);
 
     sleep(1);
-
-    memset(buffer, 0, BUFFER_SIZE);
-
-    read(file_descriptor, (uint8_t *)buffer, BUFFER_SIZE);
-
-    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
-        printf("%c", buffer[i]);
-
-        if (buffer[i] == '\r') {
-            printf("\n");
-        }
-    }
-
-    printf("\r\n");
+    recieve_data(file_descriptor);
 }
 
 int main(void)

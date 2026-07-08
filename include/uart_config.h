@@ -10,7 +10,7 @@
  * @return
  * The file descriptor int number
  */
-int open_serial_port(char *port_path);
+int open_serial_port(const char *port_path);
 
 /**
  * @brief
@@ -22,7 +22,7 @@ int open_serial_port(char *port_path);
  * @param fd
  * file descriptor file
  */
-void configure_serial_port(int fd);
+void configure_serial_port(const int fd);
 
 /**
  * @brief
@@ -31,4 +31,4 @@ void configure_serial_port(int fd);
  * @param fd
  * file descriptor file
  */
-void close_serial_port(int fd);
+void close_serial_port(const int fd);
