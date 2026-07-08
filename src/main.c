@@ -94,7 +94,7 @@ static void sem_switch_to_idle(void)
 
 int main(void)
 {
-    printf("Starting the sem_init application...\r\n");
+    printf("Starting the sem_api application...\r\n");
 
     file_descriptor = open_serial_port(SERIAL_PORT_PATH);
 

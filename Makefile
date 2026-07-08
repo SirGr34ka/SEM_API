@@ -2,7 +2,7 @@
 PROJECT_NAME := sem_api
 SOURCE_DIR   := src
 INCLUDE_DIR  := include
-BUILD_DIR    ?= build
+BUILD_DIR    := build
 
 # Define variables for source and object files
 SOURCE_FILES := $(wildcard $(SOURCE_DIR)/*.c)
@@ -13,17 +13,11 @@ ifeq ($(origin CC), default)
 	CC = ./../arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
 endif
 
-CFLAGS ?= -Wall -Wextra -pedantic -std=c11 -I./$(INCLUDE_DIR)
+CFLAGS ?= -Wall -Wextra -pedantic -std=c11 -O2
+override CFLAGS += -I./$(INCLUDE_DIR)
 
 .PHONY : all
 all : $(PROJECT_NAME)
-
-# Include all dependencies
-NODEPS = clean
-
-ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
-include $(OBJECT_FILES:.o=.d)
-endif
 
 # Compile the project
 $(PROJECT_NAME) : $(OBJECT_FILES)
@@ -39,3 +33,10 @@ $(BUILD_DIR)/%.d : $(SOURCE_DIR)/%.c
 .PHONY : clean
 clean :
 	rm -f $(addprefix $(BUILD_DIR)/, *.o *.d) $(PROJECT_NAME)
+
+# Include all dependencies
+NODEPS := clean
+
+ifeq (0, $(words $(findstring $(MAKECMDGOALS), $(NODEPS))))
+include $(OBJECT_FILES:.o=.d)
+endif
