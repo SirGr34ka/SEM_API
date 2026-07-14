@@ -13,7 +13,7 @@ ifeq ($(origin CC), default)
 	CC = ./../arm-gnu-toolchain-12.2.rel1-x86_64-aarch64-none-linux-gnu/bin/aarch64-none-linux-gnu-gcc
 endif
 
-CFLAGS ?= -Wall -Wextra -pedantic -std=c11 -O2
+CFLAGS ?= -Wall -Wextra -pedantic -std=c17 -O2
 override CFLAGS += -I./$(INCLUDE_DIR)
 
 .PHONY : all

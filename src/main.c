@@ -12,12 +12,37 @@ static void sem_switch_to_idle(void)
 {
     recieve_data(file_descriptor);
 
-    send_command(file_descriptor, MOVE_TO_IDLE);
+    send_command(file_descriptor, MOVE_TO_IDLE, 0, 0, 0);
 
     sleep(1);
     recieve_data(file_descriptor);
 
-    send_command(file_descriptor, DO_QUARY_CONST);
+    send_command(file_descriptor, DO_QUARY, 50000, 46, 5);
+
+    sleep(1);
+    recieve_data(file_descriptor);
+
+    send_command(file_descriptor, DO_INJECTION, 50000, 46, 5);
+
+    sleep(1);
+    recieve_data(file_descriptor);
+
+    send_command(file_descriptor, DO_QUARY, 50000, 46, 5);
+
+    sleep(1);
+    recieve_data(file_descriptor);
+
+    send_command(file_descriptor, MOVE_TO_OBSERVATION, 0, 0, 0);
+
+    sleep(1);
+    recieve_data(file_descriptor);
+
+    send_command(file_descriptor, MOVE_TO_IDLE, 0, 0, 0);
+
+    sleep(1);
+    recieve_data(file_descriptor);
+
+    send_command(file_descriptor, DO_QUARY, 50000, 46, 5);
 
     sleep(1);
     recieve_data(file_descriptor);

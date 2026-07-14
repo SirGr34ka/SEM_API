@@ -8,7 +8,7 @@
  * path to serial device file
  *
  * @return
- * The file descriptor int number
+ * File descriptor int number
  */
 int open_serial_port(const char *port_path);
 
@@ -20,15 +20,15 @@ int open_serial_port(const char *port_path);
  * attributes.
  *
  * @param fd
- * file descriptor file
+ * file descriptor for serial port
  */
 void configure_serial_port(const int fd);
 
 /**
  * @brief
- * Closes a sereal port
+ * Closes a serial port
  *
  * @param fd
- * file descriptor file
+ * file descriptor for serial port
  */
 void close_serial_port(const int fd);
