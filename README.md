@@ -29,14 +29,11 @@ API позволяет отправлять команды и считать д�
    make CC="./path/to/compiler"
    ```
 
-Переменная "CFLAGS" содержит флаги для компиляции. Например, их можно изменить таким образом:
-
-   ```bash
-   make CFLAGS="-Wall -std=c11 -I./.include"
-   ```
-
 Предусмотрена цель "clean" для очистки build-дериктории:
 
    ```bash
    make clean
    ```
+
+## Структурная диаграмма программы
+![sem_api structure scheme](./doc/images/sem_api_structure_scheme.svg)
