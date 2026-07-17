@@ -2,11 +2,20 @@
 
 #include <fcntl.h>
 #include <stdlib.h>
-#include <termios.h>
 #include <stdio.h>
 #include <unistd.h>
 
-int open_serial_port(const char *port_path)
+/**
+ * @brief
+ * Opens a serial port
+ *
+ * @param port_path
+ * path to serial device file
+ *
+ * @return
+ * File descriptor int number
+ */
+static int open_serial_port(const char *port_path)
 {
     int fd;
 
@@ -20,7 +29,17 @@ int open_serial_port(const char *port_path)
     return fd;
 }
 
-void configure_serial_port(const int fd)
+/**
+ * @brief
+ * Configures a serial port
+ *
+ * Serial port will be configured with baudrate B115200 and raw mode via termios
+ * attributes.
+ *
+ * @param fd
+ * file descriptor for serial port
+ */
+static void configure_serial_port(const int fd)
 {
     struct termios tty_attributes;
 
@@ -42,6 +61,21 @@ void configure_serial_port(const int fd)
     if (tcsetattr(fd, TCSANOW, &tty_attributes)) {
         printf("Something went wrong while setting port attributes!\r\n");
         exit(EXIT_FAILURE);
+    }
+}
+
+void sem_uart_init(const char *port_path, int custom_attr_flag, sem_uart_t *uart)
+{
+    uart->fd = open_serial_port(port_path);
+
+    if (!custom_attr_flag) {
+        configure_serial_port(uart->fd);
+        tcgetattr(uart->fd, uart->sem_uart_attr_ptr);
+    } else {
+        if (tcsetattr(uart->fd, TCSANOW, uart->sem_uart_attr_ptr)) {
+            printf("Something went wrong while setting UART port attributes!\r\n");
+            exit(EXIT_FAILURE);
+        }
     }
 }
 

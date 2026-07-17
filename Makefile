@@ -14,6 +14,7 @@ ifeq ($(origin CC), default)
 endif
 
 CFLAGS ?= -Wall -Wextra -pedantic -std=c17 -O2
+CFLAGS += -I./${INCLUDE_DIR}
 
 .PHONY : all
 all : $(PROJECT_NAME)

@@ -52,9 +52,11 @@ int main(void)
 {
     printf("Starting the sem_api application...\r\n");
 
-    file_descriptor = open_serial_port(SERIAL_PORT_PATH);
+    sem_uart_t uart;
 
-    configure_serial_port(file_descriptor);
+    sem_uart_init(SERIAL_PORT_PATH, 0, &uart);
+
+    file_descriptor = uart.fd;
 
     sem_switch_to_idle();
 
