@@ -1,8 +1,8 @@
-#include "uart_config.h"
-#include "uart_io.h"
+#include "sem_uart_init.h"
+#include "sem_uart_io.h"
 
-#include <stdio.h>
-#include <unistd.h>
+#include <stdio.h>  // printf()
+#include <unistd.h> // sleep()
 
 #define SERIAL_PORT_PATH "/dev/ttyUL0"
 
@@ -54,13 +54,13 @@ int main(void)
 
     sem_uart_t uart;
 
-    sem_uart_init(SERIAL_PORT_PATH, 0, &uart);
+    sem_uart_init_default(SERIAL_PORT_PATH, &uart);
 
     file_descriptor = uart.fd;
 
     sem_switch_to_idle();
 
-    close_serial_port(file_descriptor);
+    sem_uart_close(&uart);
 
     return 0;
 }
