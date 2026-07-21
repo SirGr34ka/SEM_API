@@ -1,11 +1,15 @@
 #pragma once
 
-#include <stdint.h>
+#include "sem_uart_struct.h" // sem_uart_t
+
+#include <stdint.h> // uint*_t
+
+typedef uint8_t sem_uart_cmd_t;
 
 /**
  * @name UART commands
  *
- * @brief Commands which can be sent to the SEM controller via UART
+ * @brief Commands which may be sent to the SEM controller via UART
  */
 ///@{
 #define MOVE_TO_IDLE 00 /**< Move to IDLE state command */
@@ -20,6 +24,12 @@
   30 /**< Move to DIAGNOSTIC SCAN state command  \*/
 ///@}
 
+typedef struct sem_uart_addr {
+  uint32_t lfa;
+  uint16_t wa;
+  uint16_t ba;
+} sem_uart_addr_t;
+
 /**
  * @brief
  * Checks if a file has opened and has read-write access mode
@@ -27,7 +37,7 @@
  * @param fd
  * file descriptor for serial port
  */
-void check_fd(const int fd);
+// void check_fd(const int fd);
 
 /**
  * @brief
@@ -63,8 +73,8 @@ int is_lfa_reserved(const uint32_t lfa);
  * bit address used by @ref DO_INJECTION command only,
  * otherwise will be ignored
  */
-void send_command(const int fd, const uint8_t command_num, const uint32_t lfa,
-                  const uint16_t wa, const uint16_t ba);
+void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t command_num,
+                   const sem_uart_addr_t *addr);
 
 /**
  * @brief
@@ -73,4 +83,4 @@ void send_command(const int fd, const uint8_t command_num, const uint32_t lfa,
  * @param fd
  * file descriptor for serial port
  */
-void recieve_data(const int fd);
+void sem_uart_recieve(const sem_uart_t *uart);

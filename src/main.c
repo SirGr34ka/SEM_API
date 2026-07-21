@@ -1,3 +1,4 @@
+#include "sem_uart_struct.h"
 #include "sem_uart_init.h"
 #include "sem_uart_io.h"
 

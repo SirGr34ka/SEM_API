@@ -1,25 +1,27 @@
 #include "sem_uart_io.h"
 
-#include <fcntl.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <stddef.h>
-#include <string.h>
-#include <stdint.h>
-#include <unistd.h>
+// #include <fcntl.h>
+#include <stdio.h>  // printf()
+#include <stdlib.h> // exit(), EXIT_FAILURE
+#include <stddef.h> // size_t
+#include <errno.h>  // errno
+#include <string.h> // strcpy(), memset() strerror()
+// #include <stdint.h>
+#include <unistd.h> // read(), write(), ssize_t
 
 #define MAX_FRAME 0x0000E0BC
+#define MAX_WORD 92 // 122 for UltraScale
 
-void check_fd(const int fd)
-{
-    const int flags = fcntl(fd, F_GETFL);
-    const int access_flag = O_ACCMODE & flags;
+// void check_fd(const int fd)
+// {
+//     const int flags = fcntl(fd, F_GETFL);
+//     const int access_flag = O_ACCMODE & flags;
 
-    if ((flags < 0) || (access_flag != O_RDWR)) {
-        printf("Could not open the file! File descriptor was: %d.\r\n", fd);
-        exit(EXIT_FAILURE);
-    }
-}
+//     if ((flags < 0) || (access_flag != O_RDWR)) {
+//         printf("Could not open the file! File descriptor was: %d.\r\n", fd);
+//         exit(EXIT_FAILURE);
+//     }
+// }
 
 int is_lfa_reserved(const uint32_t lfa)
 {
@@ -28,12 +30,12 @@ int is_lfa_reserved(const uint32_t lfa)
 
 /**
  * @brief
- * Makes full address by concatinating LFA, word address and byte address for query and injection
- * commands usage
+ * Makes full address by concatinating LFA, word address and byte address for
+ * query and injection commands usage
  *
- * Full address looks like this mask: 00ll llll llll llll wwww wwwb bbbb, where 'l' bit for LFA, 'w'
- * bit for WA and 'b' bit for BA. Function checks if LFA, WA and BA in the range, else reports
- * in terminal about out of range.
+ * Full address looks like this mask: 00ll llll llll llll wwww wwwb bbbb, where
+ * 'l' bit for LFA, 'w' bit for WA and 'b' bit for BA. Function checks if LFA,
+ * WA and BA in the range, else reports in terminal about out of range.
  *
  * @param lfa
  * linear frame address
@@ -47,17 +49,18 @@ int is_lfa_reserved(const uint32_t lfa)
  * @return
  * Full address in LFA format
  */
-static uint64_t make_address(const uint32_t lfa, const uint16_t wa, const uint16_t ba)
+static uint64_t make_address(const sem_uart_addr_t *addr)
 {
-    const uint16_t MAX_WORD = 92; // 122 for UltraScale
     const uint16_t MAX_BIT = 31;
 
     uint64_t address = 0;
 
-    if (is_lfa_reserved(lfa)) {
-        printf("LFA is out of valid range! Choose valid frame address within %d..%d range.\r\n",
-               (MAX_FRAME / 3 * 2) + 1,
-               MAX_FRAME - 2);
+    if (is_lfa_reserved(addr->lfa)) {
+        printf(
+            "LFA is out of valid range! Choose valid frame address within "
+            "%d..%d range.\r\n",
+            (MAX_FRAME / 3 * 2) + 1,
+            MAX_FRAME - 2);
         exit(EXIT_FAILURE);
     } else {
         address |= lfa << 12;
@@ -65,7 +68,8 @@ static uint64_t make_address(const uint32_t lfa, const uint16_t wa, const uint16
 
     if (wa > MAX_WORD) {
         printf(
-            "Word address is out of valid range! Choose valid word address within 0..%d range.\r\n",
+            "Word address is out of valid range! Choose valid word address "
+            "within 0..%d range.\r\n",
             MAX_WORD);
         exit(EXIT_FAILURE);
     } else {
@@ -74,7 +78,8 @@ static uint64_t make_address(const uint32_t lfa, const uint16_t wa, const uint16
 
     if (ba > MAX_BIT) {
         printf(
-            "Bit address is out of valid range! Choose valid bit address within 0..%d range.\r\n",
+            "Bit address is out of valid range! Choose valid bit address "
+            "within 0..%d range.\r\n",
             MAX_BIT);
         exit(EXIT_FAILURE);
     } else {
@@ -84,11 +89,7 @@ static uint64_t make_address(const uint32_t lfa, const uint16_t wa, const uint16
     return address;
 }
 
-void send_command(const int fd,
-                  const uint8_t command_num,
-                  const uint32_t lfa,
-                  const uint16_t wa,
-                  const uint16_t ba)
+void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t command_num, const sem_uart_addr_t *addr)
 {
     check_fd(fd);
 
@@ -155,7 +156,9 @@ static void check_hlt(const char *data)
     char *hlt_messege = strstr(data, "HLT");
 
     if ((state_changed_to_hlt != NULL) || (hlt_messege != NULL)) {
-        printf("SEM controller detected an internal inconsistency! FPGA must be reconfigured!\r\n");
+        printf(
+            "SEM controller detected an internal inconsistency! FPGA must be "
+            "reconfigured!\r\n");
         exit(EXIT_FAILURE);
     }
 }
