@@ -136,8 +136,9 @@ static speed_t get_termios_baud_from_uint(uint32_t baudrate)
             return B4000000;
 
         default:
-            printf("Input baudrate %d is not supported! Only standart baudrates is supported.\r\n",
-                   baudrate);
+            printf(
+                "\r\nInput baudrate %d is not supported! Only standart baudrates is supported.\r\n",
+                baudrate);
             exit(EXIT_FAILURE);
     }
 }
@@ -156,7 +157,8 @@ static tcflag_t get_termios_parity_from_uint(uint8_t parity)
 
         default:
             printf(
-                "Input parity value %d is not supported! Only 0 (no parity), 1 (even parity) and 2 "
+                "\r\nInput parity value %d is not supported! Only 0 (no parity), 1 (even parity) "
+                "and 2 "
                 "(odd parity) values are supported.\r\n",
                 parity);
             exit(EXIT_FAILURE);
@@ -174,7 +176,8 @@ static tcflag_t get_termios_stop_bit_from_uint(uint8_t stop_bit)
 
         default:
             printf(
-                "Input stop bit value %d is not supported! Only 0 (1 bit) and 1 (2 bits) values "
+                "\r\nInput stop bit value %d is not supported! Only 0 (1 bit) and 1 (2 bits) "
+                "values "
                 "are supported.\r\n",
                 stop_bit);
             exit(EXIT_FAILURE);
@@ -197,8 +200,10 @@ static tcflag_t get_termios_word_size_from_uint(uint8_t word_size)
             return CS8;
 
         default:
-            printf("Input word size %d is not supported! Only 5, 6, 7, 8 values are supported.\r\n",
-                   word_size);
+            printf(
+                "\r\nInput word size %d is not supported! Only 5, 6, 7, 8 values are "
+                "supported.\r\n",
+                word_size);
             exit(EXIT_FAILURE);
     }
 }
@@ -255,7 +260,7 @@ void sem_uart_init(const char *uart_path, sem_uart_t *uart)
     uint8_t word_size;
     sem_uart_cfg_t *cfg_ptr;
 
-    cfg_ptr = uart->sem_uart_attr;
+    cfg_ptr = uart->cfg;
 
     termios_t attr;
     int getattr_res;

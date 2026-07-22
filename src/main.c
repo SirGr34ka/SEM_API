@@ -59,7 +59,14 @@ int main(void)
 {
     printf("Starting the sem_api application...\r\n");
 
-    uart.sem_uart_attr = NULL;
+    sem_uart_cfg_t cfg;
+
+    cfg.baudrate = 9600;
+    cfg.parity = 2;
+    cfg.stop_bit = 1;
+    cfg.word_size = 6;
+
+    uart.cfg = &cfg;
 
     sem_uart_init(SERIAL_PORT_PATH, &uart);
     sem_injection_scenario();

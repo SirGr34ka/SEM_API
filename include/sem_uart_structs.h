@@ -11,5 +11,5 @@ typedef struct sem_uart_cfg {
 
 typedef struct sem_uart {
   int fd;
-  sem_uart_cfg_t *sem_uart_attr;
+  sem_uart_cfg_t *cfg;
 } sem_uart_t;
