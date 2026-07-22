@@ -1,8 +1,6 @@
 #pragma once
 
-#include "sem_uart_struct.h" // sem_uart_t
-
-#include <stdint.h> // uint*_t
+#include "sem_uart_structs.h" // sem_uart_t
 
 typedef uint8_t sem_uart_cmd_t;
 
