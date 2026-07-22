@@ -2,6 +2,12 @@
 
 #include "sem_uart_structs.h" // sem_uart_t
 
+typedef struct sem_addr {
+  uint32_t lfa;
+  uint16_t wa;
+  uint16_t ba;
+} sem_addr_t;
+
 typedef uint8_t sem_uart_cmd_t;
 
 /**
@@ -22,21 +28,6 @@ typedef uint8_t sem_uart_cmd_t;
   30 /**< Move to DIAGNOSTIC SCAN state command  \*/
 ///@}
 
-typedef struct sem_uart_addr {
-  uint32_t lfa;
-  uint16_t wa;
-  uint16_t ba;
-} sem_uart_addr_t;
-
-/**
- * @brief
- * Checks if a file has opened and has read-write access mode
- *
- * @param fd
- * file descriptor for serial port
- */
-// void check_fd(const int fd);
-
 /**
  * @brief
  * Checks if LFA reserved
@@ -47,7 +38,7 @@ typedef struct sem_uart_addr {
  * @return
  * if LFA reserved - 1, else - 0
  */
-int is_lfa_reserved(const uint32_t lfa);
+// int check_is_lfa_reserved(const uint32_t lfa);
 
 /**
  * @brief
@@ -72,7 +63,7 @@ int is_lfa_reserved(const uint32_t lfa);
  * otherwise will be ignored
  */
 void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t command_num,
-                   const sem_uart_addr_t *addr);
+                   const sem_addr_t *addr);
 
 /**
  * @brief

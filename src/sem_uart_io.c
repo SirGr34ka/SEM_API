@@ -12,22 +12,6 @@
 #define MAX_FRAME 0x0000E0BC
 #define MAX_WORD 92 // 122 for UltraScale
 
-// void check_fd(const int fd)
-// {
-//     const int flags = fcntl(fd, F_GETFL);
-//     const int access_flag = O_ACCMODE & flags;
-
-//     if ((flags < 0) || (access_flag != O_RDWR)) {
-//         printf("Could not open the file! File descriptor was: %d.\r\n", fd);
-//         exit(EXIT_FAILURE);
-//     }
-// }
-
-int is_lfa_reserved(const uint32_t lfa)
-{
-    return !((lfa > (MAX_FRAME / 3 * 2)) && (lfa < (MAX_FRAME - 1)));
-}
-
 /**
  * @brief
  * Makes full address by concatinating LFA, word address and byte address for
@@ -49,98 +33,123 @@ int is_lfa_reserved(const uint32_t lfa)
  * @return
  * Full address in LFA format
  */
-static uint64_t make_address(const sem_uart_addr_t *addr)
+static uint64_t format_address(const sem_addr_t *addr)
 {
+    if (addr == NULL) {
+        printf("Address is undefined! Define the address.\r\n");
+        exit(EXIT_FAILURE);
+    }
+
     const uint16_t MAX_BIT = 31;
 
-    uint64_t address = 0;
+    uint32_t lfa;
+    uint16_t wa;
+    uint16_t ba;
+    uint64_t formated_addr = 0;
 
-    if (is_lfa_reserved(addr->lfa)) {
+    lfa = addr->lfa;
+    wa = addr->wa;
+    ba = addr->ba;
+
+    if (lfa > (MAX_FRAME - 2)) {
+        printf(
+            "LFA %d is out of valid range! Choose valid frame address within "
+            "0..%d range.\r\n",
+            lfa,
+            MAX_FRAME - 2);
+        exit(EXIT_FAILURE);
+    } else {
+        formated_addr |= lfa << 12;
+    }
+
+    if (wa > MAX_WORD) {
+        printf(
+            "Word address %d is out of valid range! Choose valid word address "
+            "within 0..%d range.\r\n",
+            wa,
+            MAX_WORD);
+        exit(EXIT_FAILURE);
+    } else {
+        formated_addr |= wa << 5;
+    }
+
+    if (addr->ba > MAX_BIT) {
+        printf(
+            "Bit address %d is out of valid range! Choose valid bit address "
+            "within 0..%d range.\r\n",
+            ba,
+            MAX_BIT);
+        exit(EXIT_FAILURE);
+    } else {
+        formated_addr |= addr->ba;
+    }
+
+    return formated_addr;
+}
+
+static void check_is_lfa_reserved(const uint32_t lfa)
+{
+    if (!((lfa > (MAX_FRAME / 3 * 2)) && (lfa < (MAX_FRAME - 1)))) {
         printf(
             "LFA is out of valid range! Choose valid frame address within "
             "%d..%d range.\r\n",
             (MAX_FRAME / 3 * 2) + 1,
             MAX_FRAME - 2);
         exit(EXIT_FAILURE);
-    } else {
-        address |= lfa << 12;
     }
-
-    if (wa > MAX_WORD) {
-        printf(
-            "Word address is out of valid range! Choose valid word address "
-            "within 0..%d range.\r\n",
-            MAX_WORD);
-        exit(EXIT_FAILURE);
-    } else {
-        address |= wa << 5;
-    }
-
-    if (ba > MAX_BIT) {
-        printf(
-            "Bit address is out of valid range! Choose valid bit address "
-            "within 0..%d range.\r\n",
-            MAX_BIT);
-        exit(EXIT_FAILURE);
-    } else {
-        address |= ba;
-    }
-
-    return address;
 }
 
-void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t command_num, const sem_uart_addr_t *addr)
+void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t cmd, const sem_addr_t *addr)
 {
-    check_fd(fd);
+    uint64_t formated_addr;
+    const size_t CMD_STR_SIZE = 16;
+    char cmd_str[CMD_STR_SIZE];
 
-    uint64_t address;
-    const size_t COMMAND_SIZE = 16;
-    char command[COMMAND_SIZE];
+    memset(cmd_str, 0, CMD_STR_SIZE);
 
-    memset(command, 0, COMMAND_SIZE);
-
-    switch (command_num) {
+    switch (cmd) {
         /* States moving */
         case MOVE_TO_IDLE:
-            strcpy(command, "I");
+            strcpy(cmd_str, "I");
             break;
 
         case MOVE_TO_OBSERVATION:
-            strcpy(command, "O");
+            strcpy(cmd_str, "O");
             break;
 
         case MOVE_TO_DETECT_ONLY:
-            strcpy(command, "D");
+            strcpy(cmd_str, "D");
             break;
 
         case MOVE_TO_DIAGNOSTIC_SCAN:
-            strcpy(command, "U");
+            strcpy(cmd_str, "U");
             break;
 
         /* Commands in IDLE */
         case DO_QUARY:
-            strcpy(command, "Q C00");
-            address = make_address(lfa, 0, 0);
-            snprintf(command + 5, COMMAND_SIZE - 5, "%0*lX", 8, address);
+            strcpy(cmd_str, "Q C00");
+            formated_addr = format_address(addr);
+            snprintf(cmd_str + 5, CMD_STR_SIZE - 5, "%0*lX", 8, formated_addr);
             break;
 
         case DO_INJECTION:
-            strcpy(command, "N C00");
-            address = make_address(lfa, wa, ba);
-            snprintf(command + 5, COMMAND_SIZE - 5, "%0*lX", 8, address);
+            check_is_lfa_reserved(addr->lfa);
+            strcpy(cmd_str, "N C00");
+            formated_addr = format_address(addr);
+            snprintf(cmd_str + 5, CMD_STR_SIZE - 5, "%0*lX", 8, formated_addr);
             break;
 
         default:
-            strcpy(command, "I");
+            strcpy(cmd_str, "I");
             break;
     }
 
-    if (write(fd, (uint8_t *)command, COMMAND_SIZE) < 0) {
-        printf("Could not write to file! File descriptor was: %d.\r\n", fd);
+    if (write(uart->fd, (uint8_t *)cmd_str, CMD_STR_SIZE) < 0) {
+        printf("Error %i happened while writing command to UART: %s\r\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
 
-    printf("\r\nCommand '%s' sent\r\n", command);
+    printf("\r\nCommand '%s' sent\r\n", cmd_str);
 }
 
 /**
@@ -157,22 +166,24 @@ static void check_hlt(const char *data)
 
     if ((state_changed_to_hlt != NULL) || (hlt_messege != NULL)) {
         printf(
-            "SEM controller detected an internal inconsistency! FPGA must be "
-            "reconfigured!\r\n");
+            "SEM controller detected internal inconsistency! FPGA must be "
+            "reconfigured.\r\n");
         exit(EXIT_FAILURE);
     }
 }
 
-void recieve_data(const int fd)
+void sem_uart_recieve(const sem_uart_t *uart)
 {
-    check_fd(fd);
-
     const size_t BUFFER_SIZE = 1024;
     char buffer[BUFFER_SIZE];
 
     memset(buffer, 0, BUFFER_SIZE);
 
-    ssize_t bytes = read(fd, (uint8_t *)buffer, BUFFER_SIZE);
+    ssize_t bytes = read(uart->fd, (uint8_t *)buffer, BUFFER_SIZE);
+
+    if (bytes < 0) {
+        printf("Error %i happened while reading UART: %s\r\n", errno, strerror(errno));
+    }
 
     if (bytes >= 5) {
         check_hlt(buffer);

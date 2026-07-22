@@ -249,15 +249,15 @@ void sem_uart_init(const char *uart_path, sem_uart_t *uart)
     fd = open_com_port(uart_path);
     uart->fd = fd;
 
+    uint32_t baudrate;
+    uint8_t parity;
+    uint8_t stop_bit;
+    uint8_t word_size;
     sem_uart_cfg_t *cfg_ptr;
 
     cfg_ptr = uart->sem_uart_attr;
 
     termios_t attr;
-    speed_t termios_baud;
-    tcflag_t termios_parity;
-    tcflag_t termios_stop_bit;
-    tcflag_t termios_word_size;
     int getattr_res;
 
     getattr_res = tcgetattr(fd, &attr);
@@ -280,61 +280,39 @@ void sem_uart_init(const char *uart_path, sem_uart_t *uart)
     if (cfg_ptr == NULL) {
         printf("Default UART config will be set: ");
 
-        /* baudrate */
-        termios_baud = get_termios_baud_from_uint(DEFAULT_BAUDRATE);
-
-        printf("baudrate = %d ; ", DEFAULT_BAUDRATE);
-
-        /* parity */
-        termios_parity = get_termios_parity_from_uint(DEFAULT_PARITY);
-
-        printf("parity = %d ; ", DEFAULT_PARITY);
-
-        /* stop bit */
-        termios_stop_bit = get_termios_parity_from_uint(DEFAULT_STOP_BIT);
-
-        printf("stop bit = %d ; ", DEFAULT_STOP_BIT);
-
-        /* word size */
-        termios_word_size = get_termios_word_size_from_uint(DEFAULT_WORD_SIZE);
-
-        printf("word size = %d.\r\n", DEFAULT_WORD_SIZE);
+        baudrate = DEFAULT_BAUDRATE;
+        parity = DEFAULT_PARITY;
+        stop_bit = DEFAULT_STOP_BIT;
+        word_size = DEFAULT_WORD_SIZE;
     } else {
         printf("Custom UART config will be set: ");
 
-        /* baudrate */
-        termios_baud = get_termios_baud_from_uint(cfg_ptr->baudrate);
-
-        printf("baudrate = %d ; ", cfg_ptr->baudrate);
-
-        /* parity */
-        termios_parity = get_termios_parity_from_uint(cfg_ptr->parity);
-
-        printf("parity = %d ; ", cfg_ptr->parity);
-
-        /* stop bit */
-        termios_stop_bit = get_termios_parity_from_uint(cfg_ptr->stop_bit);
-
-        printf("stop bit = %d ; ", cfg_ptr->stop_bit);
-
-        /* word size */
-        termios_word_size = get_termios_word_size_from_uint(cfg_ptr->word_size);
-
-        printf("word size = %d.\r\n", cfg_ptr->word_size);
+        baudrate = cfg_ptr->baudrate;
+        parity = cfg_ptr->parity;
+        stop_bit = cfg_ptr->stop_bit;
+        word_size = cfg_ptr->word_size;
     }
 
     /* baudrate */
-    cfsetispeed(&attr, termios_baud);
-    cfsetospeed(&attr, termios_baud);
+    cfsetispeed(&attr, get_termios_baud_from_uint(baudrate));
+    cfsetospeed(&attr, get_termios_baud_from_uint(baudrate));
+
+    printf("baudrate = %d, ", baudrate);
 
     /* parity */
-    attr.c_cflag |= termios_parity;
+    attr.c_cflag |= get_termios_parity_from_uint(parity);
+
+    printf("parity = %d, ", parity);
 
     /* stop bit */
-    attr.c_cflag |= termios_stop_bit;
+    attr.c_cflag |= get_termios_stop_bit_from_uint(stop_bit);
+
+    printf("stop bit = %d, ", stop_bit);
 
     /* word size */
-    attr.c_cflag |= termios_word_size;
+    attr.c_cflag |= get_termios_word_size_from_uint(word_size);
+
+    printf("word size = %d.\r\n", word_size);
 
     configure_com_port(fd, &attr);
 }
