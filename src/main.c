@@ -9,14 +9,32 @@
 
 sem_uart_t uart;
 
+void print_recieved_data(const char *buffer, size_t size)
+{
+    for (size_t i = 0; i < size; ++i) {
+        printf("%c", buffer[i]);
+
+        if (buffer[i] == '\r') {
+            printf("\n");
+        }
+    }
+
+    printf("\r\n");
+}
+
 static void sem_injection_scenario(void)
 {
-    sem_uart_recieve(&uart);
+    const size_t SIZE = 1024;
+    char buffer[SIZE];
+
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, MOVE_TO_IDLE, NULL);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_addr_t addr;
 
@@ -27,32 +45,38 @@ static void sem_injection_scenario(void)
     sem_uart_send(&uart, DO_QUARY, &addr);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, DO_INJECTION, &addr);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, DO_QUARY, &addr);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, MOVE_TO_OBSERVATION, NULL);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, MOVE_TO_IDLE, NULL);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 
     sem_uart_send(&uart, DO_QUARY, &addr);
 
     sleep(1);
-    sem_uart_recieve(&uart);
+    sem_uart_recieve(&uart, buffer, SIZE);
+    print_recieved_data(buffer, SIZE);
 }
 
 int main(void)

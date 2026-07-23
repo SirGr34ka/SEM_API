@@ -1,12 +1,9 @@
 #include "sem_uart_io.h"
 
-// #include <fcntl.h>
 #include <stdio.h>  // printf()
 #include <stdlib.h> // exit(), EXIT_FAILURE
-#include <stddef.h> // size_t
 #include <errno.h>  // errno
 #include <string.h> // strcpy(), memset() strerror()
-// #include <stdint.h>
 #include <unistd.h> // read(), write(), ssize_t
 
 #define MAX_FRAME 0x0000E0BC
@@ -109,42 +106,44 @@ void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t cmd, const sem_addr_t 
 
     switch (cmd) {
         /* States moving */
-        case MOVE_TO_IDLE:
+        case MOVE_TO_IDLE : {
             strcpy(cmd_str, "I");
-            break;
+        } break;
 
-        case MOVE_TO_OBSERVATION:
+        case MOVE_TO_OBSERVATION : {
             strcpy(cmd_str, "O");
-            break;
+        } break;
 
-        case MOVE_TO_DETECT_ONLY:
+        case MOVE_TO_DETECT_ONLY : {
             strcpy(cmd_str, "D");
-            break;
+        } break;
 
-        case MOVE_TO_DIAGNOSTIC_SCAN:
+        case MOVE_TO_DIAGNOSTIC_SCAN : {
             strcpy(cmd_str, "U");
-            break;
+        } break;
 
         /* Commands in IDLE */
-        case DO_QUARY:
+        case DO_QUARY : {
             strcpy(cmd_str, "Q C00");
             formated_addr = format_address(addr);
             snprintf(cmd_str + 5, CMD_STR_SIZE - 5, "%0*lX", 8, formated_addr);
-            break;
+        } break;
 
-        case DO_INJECTION:
+        case DO_INJECTION : {
             check_is_lfa_reserved(addr->lfa);
             strcpy(cmd_str, "N C00");
             formated_addr = format_address(addr);
             snprintf(cmd_str + 5, CMD_STR_SIZE - 5, "%0*lX", 8, formated_addr);
-            break;
+        } break;
 
-        default:
+        default : {
             strcpy(cmd_str, "I");
-            break;
+        }
     }
 
-    if (write(uart->fd, (uint8_t *)cmd_str, CMD_STR_SIZE) < 0) {
+    ssize_t write_res = write(uart->fd, (uint8_t *)cmd_str, CMD_STR_SIZE);
+
+    if (write_res < 0) {
         printf("Error %i happened while writing command to UART: %s\r\n", errno, strerror(errno));
         exit(EXIT_FAILURE);
     }
@@ -172,14 +171,11 @@ static void check_hlt(const char *data)
     }
 }
 
-void sem_uart_recieve(const sem_uart_t *uart)
+void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size)
 {
-    const size_t BUFFER_SIZE = 1024;
-    char buffer[BUFFER_SIZE];
+    memset(buffer, 0, size);
 
-    memset(buffer, 0, BUFFER_SIZE);
-
-    ssize_t bytes = read(uart->fd, (uint8_t *)buffer, BUFFER_SIZE);
+    ssize_t bytes = read(uart->fd, (uint8_t *)buffer, size);
 
     if (bytes < 0) {
         printf("Error %i happened while reading UART: %s\r\n", errno, strerror(errno));
@@ -188,14 +184,4 @@ void sem_uart_recieve(const sem_uart_t *uart)
     if (bytes >= 5) {
         check_hlt(buffer);
     }
-
-    for (size_t i = 0; i < BUFFER_SIZE; ++i) {
-        printf("%c", buffer[i]);
-
-        if (buffer[i] == '\r') {
-            printf("\n");
-        }
-    }
-
-    printf("\r\n");
 }
