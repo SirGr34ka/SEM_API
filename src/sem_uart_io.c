@@ -136,6 +136,11 @@ void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t cmd, const sem_addr_t 
             snprintf(cmd_str + 5, CMD_STR_SIZE - 5, "%0*lX", 8, formated_addr);
         } break;
 
+        /* Commands in IDLE, OBSERVATION, DETECT-ONLY */
+        case DO_STATUS : {
+            strcpy(cmd_str, "S");
+        } break;
+
         default : {
             strcpy(cmd_str, "I");
         }
@@ -158,7 +163,7 @@ void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t cmd, const sem_addr_t 
  * @param data
  * char array
  */
-static void check_hlt(const char *data)
+static int check_hlt(const char *data)
 {
     char *state_changed_to_hlt = strstr(data, "SC 9F");
     char *hlt_messege = strstr(data, "HLT");
@@ -171,7 +176,7 @@ static void check_hlt(const char *data)
     }
 }
 
-void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size)
+void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size, sem_uart_handler_t handler)
 {
     memset(buffer, 0, size);
 
@@ -183,5 +188,9 @@ void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size)
 
     if (bytes >= 5) {
         check_hlt(buffer);
+    }
+
+    if (handler != NULL) {
+        int res = handler(buffer, size);
     }
 }

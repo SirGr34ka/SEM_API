@@ -30,6 +30,7 @@ static int open_com_port(const char *com_port_path)
     int fd;
 
     fd = open(com_port_path, O_RDWR | O_NONBLOCK | O_NOCTTY);
+    // fd = open(com_port_path, O_RDWR | O_NOCTTY);
 
     if (fd < 0) {
         printf("Error %i happened while opening serial port: %s\r\n", errno, strerror(errno));
@@ -186,6 +187,7 @@ void sem_uart_init(const char *uart_path, sem_uart_t *uart)
 
     cfg_ptr = uart->cfg;
 
+    speed_t termios_baudrate;
     termios_t attr;
     int getattr_res;
 
@@ -223,25 +225,27 @@ void sem_uart_init(const char *uart_path, sem_uart_t *uart)
     }
 
     /* baudrate */
-    cfsetispeed(&attr, get_termios_baud_from_uint(baudrate));
-    cfsetospeed(&attr, get_termios_baud_from_uint(baudrate));
+    termios_baudrate = get_termios_baud_from_uint(baudrate);
 
-    printf("baudrate = %d, ", baudrate);
+    cfsetispeed(&attr, termios_baudrate);
+    cfsetospeed(&attr, termios_baudrate);
+
+    printf("baudrate = %u, ", baudrate);
 
     /* parity */
     attr.c_cflag |= get_termios_parity_from_uint(parity);
 
-    printf("parity = %d, ", parity);
+    printf("parity = %u, ", parity);
 
     /* stop bit */
     attr.c_cflag |= get_termios_stop_bit_from_uint(stop_bit);
 
-    printf("stop bit = %d, ", stop_bit);
+    printf("stop bit = %u, ", stop_bit);
 
     /* word size */
     attr.c_cflag |= get_termios_word_size_from_uint(word_size);
 
-    printf("word size = %d.\r\n", word_size);
+    printf("word size = %u.\r\n", word_size);
 
     configure_com_port(fd, &attr);
 }

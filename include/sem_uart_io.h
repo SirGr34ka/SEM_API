@@ -20,6 +20,8 @@ typedef struct sem_addr {
   uint16_t ba;  ///< Bit address
 } sem_addr_t;
 
+typedef int (*sem_uart_handler_t)(const char *buffer, size_t size);
+
 /**
  * @typedef sem_uart_cmd_t
  *
@@ -43,7 +45,9 @@ typedef uint8_t sem_uart_cmd_t;
 
 #define MOVE_TO_DETECT_ONLY 20 ///< Move to DETECT ONLY state command
 
-#define MOVE_TO_DIAGNOSTIC_SCAN 30 ///< Move to DIAGNOSTIC SCAN state command
+#define DO_STATUS 31 ///< Run STATUS command
+
+#define MOVE_TO_DIAGNOSTIC_SCAN 40 ///< Move to DIAGNOSTIC SCAN state command
 ///@}
 
 /**
@@ -75,4 +79,5 @@ void sem_uart_send(const sem_uart_t *uart, sem_uart_cmd_t cmd,
  * @param size
  * size of buffer
  */
-void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size);
+void sem_uart_recieve(const sem_uart_t *uart, char *buffer, size_t size,
+                      sem_uart_handler_t handler);
