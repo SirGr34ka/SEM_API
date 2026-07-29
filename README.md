@@ -36,4 +36,4 @@ API позволяет отправлять команды и считать д�
    ```
 
 ## Структурная диаграмма программы
-![sem_api structure scheme](./doc/images/sem_api_structure_scheme.svg)
+![sem_api structure scheme](./docs/diagrams/sem_api_structure_scheme.svg)

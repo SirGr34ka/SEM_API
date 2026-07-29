@@ -23,7 +23,7 @@ static int(char *buffer, size_t size)
     return 0;
 }
 
-void sem_test_inj_and_correct(sem_uart_t *uart, sem_addr_t *addr)
+void sem_test_inj_and_corr(sem_uart_t *uart, sem_addr_t *addr)
 {
     const size_t SIZE = 1024;
     char buffer[SIZE];

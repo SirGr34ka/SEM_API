@@ -1,0 +1,69 @@
+@startuml sem_test_inj_and_corr
+    title Injection & Correction test scenario
+
+    participant "Host"           as client
+    entity      "SEM Controller" as server
+
+    skinparam SequenceMessageAlignment centers
+
+    client ->  server : MOVE_TO_IDLE
+    client <-- server
+
+    == Injection ==
+
+    client ->  server : DO_QUARY
+    client <-- server : Frame before injection
+    client ->  server : DO_INJECTION
+    client <-- server
+    client ->  server : DO_QUARY
+    client <-- server : Frame after injection
+
+    == Correction ==
+
+    client ->  server : MOVE_TO_OBSERVATION
+    client <-- server : Correction report
+    client ->  server : MOVE_TO_IDLE
+    client <-- server
+    client ->  server : DO_QUARY
+    client <-- server : Frame after correction
+
+    == ==
+
+    client ->  server : MOVE_TO_DETECT_ONLY
+    client <-- server
+@enduml
+
+@startuml sem_test_inj_and_corr_ru
+    title Тестовый сценарий ввода и коррекции ошибки
+    
+    participant "Хост"           as client
+    entity      "Контроллер SEM" as server
+
+    skinparam SequenceMessageAlignment center
+
+    client ->  server : MOVE_TO_IDLE
+    client <-- server
+
+    == Ввод ошибки ==
+
+    client ->  server : DO_QUARY
+    client <-- server : Кадр до ввода ошибки
+    client ->  server : DO_INJECTION
+    client <-- server
+    client ->  server : DO_QUARY
+    client <-- server : Кадр после ввода ошибки
+
+    == Исправление ошибки ==
+
+    client ->  server : MOVE_TO_OBSERVATION
+    client <-- server : Отчет об исправлении ошибки
+    client ->  server : MOVE_TO_IDLE
+    client <-- server
+    client ->  server : DO_QUARY
+    client <-- server : Кадр после исправления ошибки
+
+    == ==
+
+    client ->  server : MOVE_TO_DETECT_ONLY
+    client <-- server
+@enduml

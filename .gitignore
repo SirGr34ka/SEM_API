@@ -2,3 +2,6 @@
 /.*
 !/.gitignore
 /sem_api
+/dox_cfg
+/html/
+/latex/
